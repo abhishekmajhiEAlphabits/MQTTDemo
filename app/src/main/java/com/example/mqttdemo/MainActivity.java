@@ -25,6 +25,10 @@ public class MainActivity extends AppCompatActivity {
 
     MqttClient client;
     MqttAndroidClient mqttAndroidClient;
+    String serverURI = "tcp://192.168.1.18:1883";
+    String topic = "event";
+    String clientId = MqttClient.generateClientId();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,8 +58,9 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }*/
 
-        String clientId = MqttClient.generateClientId();
-        mqttAndroidClient = new MqttAndroidClient(this, "tcp://192.168.1.18:1883", clientId);
+
+        //creating mqttAndroidClient object and setting the callback for responses
+        mqttAndroidClient = new MqttAndroidClient(this, serverURI, clientId);
         mqttAndroidClient.setCallback(new MqttCallbackExtended() {
             @Override
             public void connectComplete(boolean b, String s) {
@@ -69,7 +74,8 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void messageArrived(String topic, MqttMessage mqttMessage) throws Exception {
-                Log.w("Mqtts", mqttMessage.toString());
+                Log.w("Mqtt", mqttMessage.toString());
+                Toast.makeText(MainActivity.this, "Received message : " + mqttMessage.toString(), Toast.LENGTH_LONG).show();
             }
 
             @Override
@@ -80,6 +86,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    //method called on connect button click
     public void connect(View view) {
 /*
         String clientId = MqttClient.generateClientId();
@@ -163,8 +170,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    //method called on publish button click
     public void publish(View view) {
-        String topic = "event";
+        //String topic = "event";
         String message = "the payload is working";
         try {
             //client.connect();
@@ -195,10 +203,11 @@ public class MainActivity extends AppCompatActivity {
         */
     }
 
+    //method called on subscribe button click
     public void subscribe(View view) {
         try {
 
-            mqttAndroidClient.subscribe("event", 0, null, new IMqttActionListener() {
+            mqttAndroidClient.subscribe(topic, 0, null, new IMqttActionListener() {
                 @Override
                 public void onSuccess(IMqttToken asyncActionToken) {
                     Log.w("Mqtt", "Subscribed!");
@@ -215,5 +224,24 @@ public class MainActivity extends AppCompatActivity {
             ex.printStackTrace();
         }
 
+    }
+
+    //method called on disconnect button click
+    public void disconnect(View view) {
+        try {
+            mqttAndroidClient.disconnect();
+        } catch (MqttException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    //method called on unsubscribe button click
+    public void unsubscribe(View view) {
+        try {
+            mqttAndroidClient.unsubscribe(topic);
+        } catch (MqttException e) {
+            e.printStackTrace();
+        }
     }
 }
